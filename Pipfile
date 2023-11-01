@@ -8,6 +8,10 @@ pandas = "*"
 awscli = "*"
 pyarrow = "*"
 jupyter = "*"
+boto3 = "*"
+pyyaml = "*"
+pylint = "*"
+coverage = "*"
 
 [dev-packages]
 
