@@ -1,9 +1,13 @@
 """Connector and methods accessing s3"""
 import os
 import logging
+from io import StringIO, BytesIO
 
 import boto3
+import pandas as pd
 
+from xetra.common.constants import S3FileTypes
+from xetra.common.custom_exceptions import WrongFormatException
 
 class S3BucketConnector():
     """
@@ -30,7 +34,7 @@ class S3BucketConnector():
         """
         listing all files with prefix on S3 bucket
 
-        :param prefix on the S3 bucket that should be filterd
+        :param prefix: on the S3 bucket that should be filterd
 
         returns:
          files: list of all files names
@@ -38,10 +42,22 @@ class S3BucketConnector():
         files = [obj.key for obj in self._bucket.objects.filter(Prefix=prefix)]
         return files
 
-    def read_csv_to_df(self):
+    def read_csv_to_df(self, key: str, decoding: str = 'utf-8', sep: str = ','):
         """
+        reading a csv file from S3 bucket and returning a data frame 
+
+        :param key: is a file that should be read
+        :encoding: encoding of the data inside the csv file
+        :sep: seperator of the csv file
+
+        returns:
+          data_frame: pandas DataFrame containing the data of the csv file
         """
-        pass
+        self._logger.info('reading file %s/%s/%s',self.endpoint_url, self._bucket, key)
+        csv_obj = self._bucket.Object(key=key).get().get('Body').read().decode(decoding)
+        data = StringIO(csv_obj)
+        data_frame = pd.read_csv(data, delimiter=sep)
+        return data_frame
 
     def write_df_to_s3(self):
         """
